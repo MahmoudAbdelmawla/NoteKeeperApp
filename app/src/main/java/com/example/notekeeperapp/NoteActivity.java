@@ -23,6 +23,9 @@ public class NoteActivity extends AppCompatActivity {
     private static final String TAG = "mNote";
 //    public static final String NOTE_INFO = "NOTE_INFO";
     public static final String NOTE_POSITION = "com.example.notekeeperapp.NOTE_POSITION";
+    private Spinner mSpinnerCourses;
+    private EditText mTextNoteTitle;
+    private EditText mTextNoteBody;
 
 
     @Override
@@ -32,20 +35,20 @@ public class NoteActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Spinner spinnerCourses = findViewById(R.id.spinner_courses);
+        mSpinnerCourses = findViewById(R.id.spinner_courses);
         List<CourseInfo> courses = DataManager.getInstance().getCourses();
         ArrayAdapter<CourseInfo> adapterCourses =
                 new ArrayAdapter<>(this , android.R.layout.simple_spinner_item , courses);
         adapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCourses.setAdapter(adapterCourses);
+        mSpinnerCourses.setAdapter(adapterCourses);
         
         readDisplayStateValues();
 
-        EditText textNoteTitle = findViewById(R.id.edit_text_note_title);
-        EditText textNoteBody = findViewById(R.id.edit_text_note_body);
+        mTextNoteTitle = findViewById(R.id.edit_text_note_title);
+        mTextNoteBody = findViewById(R.id.edit_text_note_body);
 
         if (!mIsNewNote)
-        displayNote( spinnerCourses , textNoteTitle , textNoteBody);
+        displayNote(mSpinnerCourses, mTextNoteTitle, mTextNoteBody);
 
     }
 
@@ -80,10 +83,22 @@ public class NoteActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_send_mail) {
+            sendEmail();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void sendEmail() {
+        CourseInfo course = (CourseInfo) mSpinnerCourses.getSelectedItem();
+        String subject = mTextNoteTitle.getText().toString();
+        String text = course.getTitle()+"\"\n"+mTextNoteBody.getText().toString();
+        Intent sendEmailIntent = new Intent(Intent.ACTION_SEND);
+        sendEmailIntent.setType("message/rcf2822");
+        sendEmailIntent.putExtra(Intent.EXTRA_SUBJECT , subject);
+        sendEmailIntent.putExtra(Intent.EXTRA_TEXT , text);
+        startActivity(sendEmailIntent);
     }
 }
